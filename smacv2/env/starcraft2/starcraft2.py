@@ -708,8 +708,7 @@ class StarCraft2Env(MultiAgentEnv):
             self.battles_game += 1
             self.timeouts += 1
 
-        if self.debug:
-            logging.debug("Reward = {}".format(reward).center(60, "-"))
+       
 
         if terminated:
             self._episode_count += 1
@@ -718,6 +717,9 @@ class StarCraft2Env(MultiAgentEnv):
             reward /= self.max_reward / self.reward_scale_rate
 
         self.reward = reward
+
+        if self.debug:
+            logging.debug("Reward = {}".format(reward).center(60, "-"))
 
         return reward, terminated, info
 
