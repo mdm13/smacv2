@@ -31,7 +31,7 @@ def register_distribution(key, cls):
 
 
 class FixedDistribution(Distribution):
-    """A generic disribution that draws from a fixed list.
+    """A generic distribution that draws from a fixed list.
     May operate in test mode, where items are drawn sequentially,
     or train mode where items are drawn randomly. Example uses of this
     are for team generation or per-agent accuracy generation in SMAC by

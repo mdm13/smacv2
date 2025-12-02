@@ -1122,6 +1122,7 @@ class StarCraft2Env(MultiAgentEnv):
             prefix=prefix,
         )
         logging.info("Replay saved at: %s" % replay_path)
+        
 
     def unit_max_shield(self, unit):
         """Returns maximal shield for a given unit."""
@@ -2305,9 +2306,19 @@ class StarCraft2Env(MultiAgentEnv):
         self._kill_units(units)
         # check the units are dead
         units = len(self._obs.observation.raw_data.units)
+        max_iterations = 100  # Add timeout to prevent infinite loop
+        iterations = 0
         while len(self._obs.observation.raw_data.units) > 0:
             self._controller.step(2)
             self._obs = self._controller.observe()
+            iterations += 1
+            if iterations >= max_iterations:
+                logging.warning(
+                    f"_kill_all_units: Failed to kill all units after {max_iterations} iterations. "
+                    f"{len(self._obs.observation.raw_data.units)} units remaining. "
+                    "This may require a full restart."
+                )
+                raise protocol.ProtocolError("Failed to kill all units")
 
     def _create_new_team(self, team, episode_config, ally):
         # unit_names = {
