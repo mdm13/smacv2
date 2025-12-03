@@ -2562,6 +2562,14 @@ class StarCraft2Env(MultiAgentEnv):
                 "zealot": Protoss.Zealot,
                 "zergling": Zerg.Zergling,
             }
+            
+            # Register unit mappings for human-readable names
+            for unit_name, unit_id in self.ally_unit_map.items():
+                self._register_unit_mapping(unit_name, unit_id)
+            # Also register enemy unit type IDs (PyC2 constants)
+            for unit_name, unit_id in self.enemy_unit_map.items():
+                if unit_id not in self.id_to_unit_name_map:
+                    self._register_unit_mapping(unit_name, unit_id)
 
         else:
             if self.map_type == "marines":
