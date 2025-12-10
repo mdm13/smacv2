@@ -466,6 +466,17 @@ class StarCraft2Env(MultiAgentEnv):
         join = self.game
         self._controller.join_game(join)
 
+        if self.debug:
+
+            resp = self._controller.game_info()
+            for mod in resp.mod_names:
+                logging.debug(f"Mod: {mod}")
+
+
+            response_data = self._controller.data()
+            for key, unit in response_data.units.items():
+                logging.debug(f"Unit {key}: {unit}")
+
         game_info = self._controller.game_info()
         map_info = game_info.start_raw
         self.map_play_area_min = map_info.playable_area.p0
@@ -2456,7 +2467,7 @@ class StarCraft2Env(MultiAgentEnv):
         if self._unit_types is None:
             warn(
                 "unit types have not been initialized yet, please call"
-                "env.reset() to populate this and call t1286he method again."
+                "env.reset() to populate this and call the method again."
             )
 
         return self._unit_types
