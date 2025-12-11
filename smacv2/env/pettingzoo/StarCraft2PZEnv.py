@@ -264,6 +264,19 @@ class smac_parallel_env(ParallelEnv):
         """Check if episode terminated (not just truncated by max_cycles)."""
         return getattr(self, '_terminated', False)
 
+    def state(self) -> np.ndarray:
+        """Return global state for centralized critic (CTDE paradigm).
+        
+        This exposes the underlying SMAC environment's global state,
+        which includes information about all allies and enemies.
+        Used by algorithms like MAPPO that have a centralized value function.
+        """
+        return np.array(self.env.get_state(), dtype=np.float32)
+
+    def state_size(self) -> int:
+        """Return size of global state vector."""
+        return self.env.get_state_size()
+
     def __del__(self):
         if hasattr(self, 'env'):
             self.env.close()
