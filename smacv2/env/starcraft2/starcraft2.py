@@ -1063,6 +1063,33 @@ class StarCraft2Env(MultiAgentEnv):
         """Returns the total number of actions an agent could ever take."""
         return self.n_actions
 
+    def get_action_names(self):
+        """Returns a list of action names corresponding to each action index.
+        
+        Note: For MMM/terran_gen maps, the target actions (indices >= n_actions_no_attack)
+        represent enemies for regular units, but allies for Medivac units (healing).
+        """
+        action_names = [
+            "no_op",
+            "stop",
+            "move_north",
+            "move_south",
+            "move_east",
+            "move_west",
+        ]
+        
+        # Add FOV actions if conic_fov is enabled
+        if self.conic_fov:
+            for i in range(self.n_fov_actions):
+                action_names.append(f"fov_direction_{i}")
+        
+        # Add target actions (attack for regular units, heal for medivacs in MMM maps)
+        n_targets = self.n_actions - self.n_actions_no_attack
+        for i in range(n_targets):
+            action_names.append(f"target_{i}")
+        
+        return action_names
+
     @staticmethod
     def distance(x1, y1, x2, y2):
         """Distance between two points."""

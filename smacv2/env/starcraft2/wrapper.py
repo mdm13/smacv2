@@ -69,6 +69,9 @@ class StarCraftCapabilityEnvWrapper(MultiAgentEnv):
     def get_total_actions(self):
         return self.env.get_total_actions()
 
+    def get_action_names(self):
+        return self.env.get_action_names()
+
     def get_capabilities(self):
         return self.env.get_capabilities()
 

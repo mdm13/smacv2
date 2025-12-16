@@ -172,6 +172,14 @@ class smac_parallel_env(ParallelEnv):
         infos = {agent: {} for agent in self.agents}
         return observations, infos
 
+
+    def get_obs_feature_names(self):
+        return self.env.get_obs_feature_names()
+
+    def get_action_names(self):
+        """Return action names for the environment."""
+        return self.env.get_action_names()
+
     def get_agent_smac_id(self, agent):
         return self.agents_id[agent]
 
@@ -195,6 +203,10 @@ class smac_parallel_env(ParallelEnv):
             agent_id = self.get_agent_smac_id(agent)
             obs = self.env.get_obs_agent(agent_id)
             action_mask = self.env.get_avail_agent_actions(agent_id)
+            #The action_mask[1:] skips the first element because:
+            #SMAC action 0 is the "no-op" action (only for dead units):
+            #When alive: avail_actions[0] = 0 (no-op not allowed)
+            #When dead: return [1] + [0] * (self.n_actions - 1) (only no-op allowed)
             action_mask = action_mask[1:]
             action_mask = np.array(action_mask).astype(np.int8)
             obs = np.asarray(obs, dtype=np.float32)
@@ -221,6 +233,7 @@ class smac_parallel_env(ParallelEnv):
                 if all_actions[agent] is None:
                     action_list[agent_id] = 0
                 else:
+                    #shift action index by 1 to match SMACv2 action space
                     action_list[agent_id] = all_actions[agent] + 1
         self._reward, terminated, smac_info = self.env.step(action_list)
         self.frames += 1
