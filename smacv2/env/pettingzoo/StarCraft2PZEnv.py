@@ -226,6 +226,15 @@ class smac_parallel_env(ParallelEnv):
         return {agent: bool(done) for agent, done in zip(self.agents, dones)}
 
     def step(self, all_actions):
+        """
+            Before
+            terminated = True for all agents when battle ends	
+            truncated = True only on timeout	
+            After:
+            terminated = True only for agents who died (health=0)
+            truncated = True when episode ends AND agent didn't die
+
+        """
         action_list = [0] * self.env.n_agents
         for agent in self.agents:
             agent_id = self.get_agent_smac_id(agent)
@@ -246,14 +255,19 @@ class smac_parallel_env(ParallelEnv):
         self._truncated = truncated
 
         all_infos = {agent: smac_info.copy() for agent in self.agents}
-        # terminated: check which agents are dead (natural episode end for those agents)
-        # If battle ended (terminated=True), all remaining agents are also terminated
+        
+        # terminated: agent actually died (health=0)
         all_terminated = self._all_dones(step_done=False)  # Check agent health
-        if terminated:
-            # Battle ended - mark all agents as terminated
-            all_terminated = {agent: True for agent in self.agents}
-        # truncated: if max_cycles reached, all agents are truncated
-        all_truncated = {agent: truncated for agent in self.agents}
+        
+        # truncated: episode ended but agent didn't die
+        # This includes: battle won, battle lost (but agent alive), or timeout
+        episode_ended = terminated or truncated  # 'terminated' from SMAC = battle ended
+        all_truncated = {}
+        for agent in self.agents:
+            agent_died = all_terminated[agent]
+            # Truncated if episode ended but this specific agent didn't die
+            all_truncated[agent] = episode_ended and not agent_died
+        
         all_rewards = self._all_rewards(self._reward)
         all_observes = self._observe_all()
 
