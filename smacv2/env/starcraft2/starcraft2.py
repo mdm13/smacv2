@@ -2436,6 +2436,10 @@ class StarCraft2Env(MultiAgentEnv):
                 for unit in self._obs.observation.raw_data.units
                 if unit.owner == 1
             ]
+            #The SC2 engine's `raw_data.units` does **not** guarantee any specific order when returning units. The order can be arbitrary and may vary between:
+            #- Different observations
+            #- Different episodes  
+            #- Different SC2 versions
             ally_units_sorted = sorted(
                 ally_units,
                 key=attrgetter("unit_type", "pos.x", "pos.y"),
