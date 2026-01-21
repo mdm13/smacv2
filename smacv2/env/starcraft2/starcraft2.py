@@ -691,6 +691,7 @@ class StarCraft2Env(MultiAgentEnv):
 
         info["dead_allies"] = dead_allies
         info["dead_enemies"] = dead_enemies
+        info["ally_initial_positions"] = self.init_positions.copy()
 
         if game_end_code is not None:
             # Battle is over
@@ -2483,6 +2484,14 @@ class StarCraft2Env(MultiAgentEnv):
 
             # TODO move this to the start
             if all_agents_created and all_enemies_created:  # all good
+                # Initialize positions now that all agents are created
+                self.init_positions = np.array(
+                    [
+                        [self.agents[i].pos.x, self.agents[i].pos.y]
+                        for i in range(self.n_agents)
+                    ],
+                    dtype=np.float32,
+                )
                 return
 
             try:

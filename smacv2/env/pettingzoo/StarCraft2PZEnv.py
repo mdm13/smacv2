@@ -168,6 +168,7 @@ class smac_parallel_env(ParallelEnv):
         self.frames = 0
         self.all_dones = {agent: False for agent in self.possible_agents}
         observations = self._observe_all()
+
         # PettingZoo parallel API requires reset() to return (observations, infos)
         infos = {agent: {} for agent in self.agents}
         return observations, infos
@@ -227,9 +228,10 @@ class smac_parallel_env(ParallelEnv):
 
     def step(self, all_actions):
         """
-            Before
+            Before change in original smacv2, the environment returned:
             terminated = True for all agents when battle ends	
             truncated = True only on timeout	
+
             After:
             terminated = True only for agents who died (health=0)
             truncated = True when episode ends AND agent didn't die
@@ -276,7 +278,7 @@ class smac_parallel_env(ParallelEnv):
                      for agent in self.agents}
         self.agents = [agent for agent in self.agents if not all_dones[agent]]
 
-        # PettingZoo parallel API requires: (obs, rew, terminated, truncated, info)
+        # PettingZoo parallel API requires: (obs, rewards, terminated, truncated, info)
         return all_observes, all_rewards, all_terminated, all_truncated, all_infos
 
     def save_replay(self):
