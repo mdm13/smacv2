@@ -134,7 +134,11 @@ class smac_parallel_env(ParallelEnv):
         """Reset environment; accepts seed/options for PettingZoo compatibility."""
         if seed is not None:
             self.seed(seed)
-        self.env._episode_count = 1
+        # Get the underlying StarCraft2Env (may be wrapped by StarCraftCapabilityEnvWrapper)
+        # The wrapper's __getattr__ only forwards reads, not writes, so we need to
+        # access the inner env directly to set _episode_count
+        inner_env = self.env.env if self.uses_capability_wrapper else self.env
+        inner_env._episode_count = 1
         self.env.reset()
 
         # When using capability wrapper, teams may change on reset
