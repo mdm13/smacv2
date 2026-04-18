@@ -2340,14 +2340,16 @@ class StarCraft2Env(MultiAgentEnv):
 
     def _kill_all_units(self):
         """Kill all units on the map. Steps controller and so can throw
-        exceptions"""
-        units = [unit.tag for unit in self._obs.observation.raw_data.units]
+        exceptions. Preserves neutral units (e.g. destructible rocks)."""
+        from s2clientprotocol import raw_pb2
+        units = [unit.tag for unit in self._obs.observation.raw_data.units
+                 if unit.alliance != raw_pb2.Neutral]
         self._kill_units(units)
-        # check the units are dead
-        units = len(self._obs.observation.raw_data.units)
+        # check the non-neutral units are dead
         max_iterations = 100  # Add timeout to prevent infinite loop
         iterations = 0
-        while len(self._obs.observation.raw_data.units) > 0:
+        while any(unit.alliance != raw_pb2.Neutral
+                  for unit in self._obs.observation.raw_data.units):
             self._controller.step(2)
             self._obs = self._controller.observe()
             iterations += 1
